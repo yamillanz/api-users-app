@@ -35,6 +35,14 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
+  findByEmailUserName(username: string) {
+    // return this.usersRepository.findOne({ where: { email, user_id } });
+    return this.usersRepository.findOne({
+      // where: { email: username, user_id: username },
+      where: [{ email: username }, { user_id: username }],
+    });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto) {
     const resp: UpdateResult = await this.usersRepository.update(
       id,
@@ -55,11 +63,6 @@ export class UsersService {
   }
 
   findAllWithPagination(page: number, limit: number) {
-    console.log(
-      '🚀 ~ UsersService ~ findAllWithPagination ~ page:',
-      page * limit,
-    );
-
     return this.usersRepository.find({
       skip: page * limit,
       take: limit,
