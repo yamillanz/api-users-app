@@ -48,4 +48,16 @@ export class UsersService {
     }
     return false;
   }
+
+  findAllWithPagination(page: number, limit: number) {
+    console.log(
+      '🚀 ~ UsersService ~ findAllWithPagination ~ page:',
+      page * limit,
+    );
+
+    return this.usersRepository.find({
+      skip: page * limit,
+      take: limit,
+    });
+  }
 }

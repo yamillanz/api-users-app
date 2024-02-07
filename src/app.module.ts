@@ -3,22 +3,27 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-// import { DataSource } from 'typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import configuration from '../config/configuration';
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mariadb',
-      host: '127.0.0.1',
-      port: 3306,
-      username: 'root',
-      password: 'algo12.-',
-      database: 'users',
-      // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      entities: [User],
-      synchronize: false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mariadb',
+        host: configService.get<string>('database.host'),
+        port: +configService.get<string>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.database'),
+        entities: [User],
+        synchronize: false,
+      }),
+      inject: [ConfigService],
     }),
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     UsersModule,
     AuthModule,
   ],

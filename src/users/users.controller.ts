@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,7 +23,10 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('page') page: number, @Query('count') limit: number) {
+    if (page && limit) {
+      return this.usersService.findAllWithPagination(+page, +limit);
+    }
     return this.usersService.findAll();
   }
 
