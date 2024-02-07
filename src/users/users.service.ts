@@ -14,6 +14,16 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    const userExists = await this.usersRepository.findOne({
+      where: [
+        { email: createUserDto.email },
+        { user_id: createUserDto.user_id },
+      ],
+    });
+    if (userExists) {
+      return { message: 'User already exists' };
+    }
+
     const user = new User();
     user.name = createUserDto.name;
     const salt = await bcrypt.genSalt(10);
@@ -36,14 +46,16 @@ export class UsersService {
   }
 
   findByEmailUserName(username: string) {
-    // return this.usersRepository.findOne({ where: { email, user_id } });
     return this.usersRepository.findOne({
-      // where: { email: username, user_id: username },
       where: [{ email: username }, { user_id: username }],
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    }
     const resp: UpdateResult = await this.usersRepository.update(
       id,
       updateUserDto,

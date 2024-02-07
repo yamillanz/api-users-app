@@ -8,6 +8,7 @@ import {
   Delete,
   NotFoundException,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +20,11 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+    const resp: any = await this.usersService.create(createUserDto);
+    if (resp.message) {
+      throw new BadRequestException(resp.message);
+    }
+    return resp;
   }
 
   @Get()
@@ -37,7 +42,7 @@ export class UsersController {
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const updateUser = await this.usersService.update(+id, updateUserDto);
+    const updateUser = await this.usersService.update(id, updateUserDto);
     if (!updateUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
