@@ -37,11 +37,17 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    if (isNaN(+id)) {
+      throw new BadRequestException('ID must be a number');
+    }
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    if (isNaN(+id)) {
+      throw new BadRequestException('ID must be a number');
+    }
     const updateUser = await this.usersService.update(id, updateUserDto);
     if (!updateUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -51,6 +57,9 @@ export class UsersController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    if (isNaN(+id)) {
+      throw new BadRequestException('ID must be a number');
+    }
     this.usersService.remove(+id);
     return { message: `User with ID ${id} has been deleted` };
   }
