@@ -79,7 +79,6 @@ export class UsersService {
         userForUpdate[key] = updateUserDto[key];
       }
     }
-    delete userForUpdate.create_time;
 
     const resp: UpdateResult = await this.usersRepository.update(
       userForUpdate.id,
