@@ -45,9 +45,9 @@ export class UsersController {
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    if (isNaN(+id)) {
-      throw new BadRequestException('ID must be a number');
-    }
+    // if (isNaN(+id)) {
+    //   throw new BadRequestException('ID must be a number');
+    // }
     const updateUser = await this.usersService.update(id, updateUserDto);
     if (!updateUser) {
       throw new NotFoundException(`User with ID ${id} not found`);

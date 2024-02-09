@@ -52,13 +52,47 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+    const newid = isNaN(+id) ? -1 : +id;
+    console.log('llego', newid);
+
+    const userForUpdate = await this.usersRepository.findOne({
+      where: [{ id: newid }, { user_id: id }, { email: id }],
+    });
+
+    if (!userForUpdate) {
+      return false;
+    }
+
+    for (const key in updateUserDto) {
+      if (updateUserDto.hasOwnProperty(key)) {
+        userForUpdate[key] = updateUserDto[key];
+      }
+    }
+
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt(10);
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
     }
+
+    // delete userForUpdate.create_time;
+    console.log(
+      '🚀 ~ UsersService ~ update ~ userForUpdate:',
+      userForUpdate.id,
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { create_time, ...userForUpdateWithoutCreate } = userForUpdate;
+    const newUpdateDto = { ...userForUpdateWithoutCreate };
+    delete newUpdateDto.id;
+    console.log('🚀 ~ UsersService ~ update ~ newUpdateDto:', newUpdateDto);
+    console.log('🚀 ~ UsersService ~ update ~ updateUserDto:', updateUserDto);
     const resp: UpdateResult = await this.usersRepository.update(
-      id,
+      // userForUpdate.id,
+      3,
       updateUserDto,
+      // userForUpdate,
+      // userForUpdateWithoutCreate,
+      // newUpdateDto,
     );
     if (resp.affected) {
       return true;
