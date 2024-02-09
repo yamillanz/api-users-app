@@ -28,7 +28,7 @@ export class UsersService {
     user.name = createUserDto.name;
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(createUserDto.password, salt);
-    // user.password = createUserDto.password;
+    user.last_name = createUserDto.last_name;
     user.email = createUserDto.email;
     user.create_time = new Date();
     user.user_id = createUserDto.user_id;
