@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,6 +10,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   name: string;
 
+  @Optional()
+  @IsString()
   last_name: string;
 
   @IsNotEmpty()

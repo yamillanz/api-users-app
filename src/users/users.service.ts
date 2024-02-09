@@ -26,9 +26,9 @@ export class UsersService {
 
     const user = new User();
     user.name = createUserDto.name;
+    user.last_name = createUserDto.last_name;
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(createUserDto.password, salt);
-    // user.password = createUserDto.password;
     user.email = createUserDto.email;
     user.create_time = new Date();
     user.user_id = createUserDto.user_id;
@@ -51,10 +51,16 @@ export class UsersService {
     });
   }
 
+  findByIdEmailUserId(username: string) {
+    const newid = isNaN(+username) ? -1 : +username;
+
+    return this.usersRepository.findOne({
+      where: [{ id: newid }, { email: username }, { user_id: username }],
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const newid = isNaN(+id) ? -1 : +id;
-    console.log('llego', newid);
-
     const userForUpdate = await this.usersRepository.findOne({
       where: [{ id: newid }, { user_id: id }, { email: id }],
     });
@@ -63,36 +69,21 @@ export class UsersService {
       return false;
     }
 
-    for (const key in updateUserDto) {
-      if (updateUserDto.hasOwnProperty(key)) {
-        userForUpdate[key] = updateUserDto[key];
-      }
-    }
-
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt(10);
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
     }
 
-    // delete userForUpdate.create_time;
-    console.log(
-      '🚀 ~ UsersService ~ update ~ userForUpdate:',
-      userForUpdate.id,
-    );
+    for (const key in updateUserDto) {
+      if (updateUserDto.hasOwnProperty(key)) {
+        userForUpdate[key] = updateUserDto[key];
+      }
+    }
+    delete userForUpdate.create_time;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { create_time, ...userForUpdateWithoutCreate } = userForUpdate;
-    const newUpdateDto = { ...userForUpdateWithoutCreate };
-    delete newUpdateDto.id;
-    console.log('🚀 ~ UsersService ~ update ~ newUpdateDto:', newUpdateDto);
-    console.log('🚀 ~ UsersService ~ update ~ updateUserDto:', updateUserDto);
     const resp: UpdateResult = await this.usersRepository.update(
-      // userForUpdate.id,
-      3,
+      userForUpdate.id,
       updateUserDto,
-      // userForUpdate,
-      // userForUpdateWithoutCreate,
-      // newUpdateDto,
     );
     if (resp.affected) {
       return true;
