@@ -36,31 +36,26 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    if (isNaN(+id)) {
-      throw new BadRequestException('ID must be a number');
+  async findOne(@Param('id') id: string) {
+    const userFinded = await this.usersService.findByIdEmailUserId(id);
+    if (!userFinded) {
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return this.usersService.findOne(+id);
+    return userFinded;
   }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    if (isNaN(+id)) {
-      throw new BadRequestException('ID must be a number');
-    }
     const updateUser = await this.usersService.update(id, updateUserDto);
     if (!updateUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return this.usersService.findOne(+id);
+    return this.usersService.findByIdEmailUserId(id);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    if (isNaN(+id)) {
-      throw new BadRequestException('ID must be a number');
-    }
-    this.usersService.remove(+id);
+    this.usersService.remove(id);
     return { message: `User with ID ${id} has been deleted` };
   }
 }

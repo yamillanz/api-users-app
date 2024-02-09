@@ -26,9 +26,9 @@ export class UsersService {
 
     const user = new User();
     user.name = createUserDto.name;
+    user.last_name = createUserDto.last_name;
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(createUserDto.password, salt);
-    user.last_name = createUserDto.last_name;
     user.email = createUserDto.email;
     user.create_time = new Date();
     user.user_id = createUserDto.user_id;
@@ -51,13 +51,38 @@ export class UsersService {
     });
   }
 
+  findByIdEmailUserId(username: string) {
+    const newid = isNaN(+username) ? -1 : +username;
+
+    return this.usersRepository.findOne({
+      where: [{ id: newid }, { email: username }, { user_id: username }],
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
+    const newid = isNaN(+id) ? -1 : +id;
+    const userForUpdate = await this.usersRepository.findOne({
+      where: [{ id: newid }, { user_id: id }, { email: id }],
+    });
+
+    if (!userForUpdate) {
+      return false;
+    }
+
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt(10);
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
     }
+
+    for (const key in updateUserDto) {
+      if (updateUserDto.hasOwnProperty(key)) {
+        userForUpdate[key] = updateUserDto[key];
+      }
+    }
+    delete userForUpdate.create_time;
+
     const resp: UpdateResult = await this.usersRepository.update(
-      id,
+      userForUpdate.id,
       updateUserDto,
     );
     if (resp.affected) {
@@ -66,8 +91,13 @@ export class UsersService {
     return false;
   }
 
-  async remove(id: number) {
-    const resp = await this.usersRepository.delete(id);
+  async remove(id: string) {
+    const newid = isNaN(+id) ? -1 : +id;
+    const userToDelete = await this.usersRepository.findOne({
+      where: [{ id: newid }, { user_id: id }, { email: id }],
+    });
+    // const resp = await this.usersRepository.delete(id);
+    const resp = await this.usersRepository.delete(userToDelete.id);
     if (resp.affected) {
       return true;
     }
