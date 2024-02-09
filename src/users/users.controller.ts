@@ -36,8 +36,12 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findByIdEmailUserId(id);
+  async findOne(@Param('id') id: string) {
+    const userFinded = await this.usersService.findByIdEmailUserId(id);
+    if (!userFinded) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return userFinded;
   }
 
   @Patch(':id')
@@ -51,10 +55,7 @@ export class UsersController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    if (isNaN(+id)) {
-      throw new BadRequestException('ID must be a number');
-    }
-    this.usersService.remove(+id);
+    this.usersService.remove(id);
     return { message: `User with ID ${id} has been deleted` };
   }
 }

@@ -91,8 +91,13 @@ export class UsersService {
     return false;
   }
 
-  async remove(id: number) {
-    const resp = await this.usersRepository.delete(id);
+  async remove(id: string) {
+    const newid = isNaN(+id) ? -1 : +id;
+    const userToDelete = await this.usersRepository.findOne({
+      where: [{ id: newid }, { user_id: id }, { email: id }],
+    });
+    // const resp = await this.usersRepository.delete(id);
+    const resp = await this.usersRepository.delete(userToDelete.id);
     if (resp.affected) {
       return true;
     }
